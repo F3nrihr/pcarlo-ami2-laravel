@@ -3,7 +3,7 @@ Amazon Linux 2 php apache composer node/npm Laravel
 
 v1 -> PHP 7.3
 
-Descarga ami-httpd.comf y run-httpd.sh
+Descarga ami-httpd.conf y run-httpd.sh
 
 Levanta el contenedor desde donde se encuentren los archivos.
 
