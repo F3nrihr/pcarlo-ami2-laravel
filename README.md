@@ -1,5 +1,5 @@
 (DOCKER) pcarlo/ami-laravel
-Amazon Linux 2 php7.3 apache composer node/npm Laravel
+Amazon Linux 2 php apache composer node/npm Laravel
 
 v1 -> PHP 7.3
 
