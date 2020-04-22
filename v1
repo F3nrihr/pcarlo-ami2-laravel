@@ -13,7 +13,7 @@ RUN yum install -y httpd \
     yum clean all
 RUN amazon-linux-extras list | grep php
 RUN amazon-linux-extras enable php7.3
-RUN yum install php-cli php-xml php-json php-mbstring php-process php-common php-fpm php-zip php-mysqlnd git initscripts unzip -y
+RUN yum install php-cli php-xml php-json php-mbstring php-process php-common php-fpm php-zip php-mysqlnd php-gd git initscripts unzip -y
 
 RUN yum install -y libfontconfig1 fontconfig libfontconfig1-dev libfreetype6-dev
 
