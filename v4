@@ -1,0 +1,65 @@
+FROM amazonlinux:2
+
+MAINTAINER Pablo Carballo
+
+# Instalando apache, php y librerias necesarias
+RUN yum update -y  && \
+    yum upgrade -y
+
+RUN yum install -y httpd \
+    man \
+    systemd \
+    yum update -y && \
+    yum clean all
+RUN amazon-linux-extras list | grep php
+RUN amazon-linux-extras enable php8.0
+RUN yum install php-cli php-xml php-json php-mbstring php-process php-common php-fpm php-zip php-mysqlnd php-gd git initscripts unzip -y
+
+RUN yum install -y libfontconfig1 fontconfig libfontconfig1-dev libfreetype6-dev
+
+# Intalando mas utils
+RUN yum install -y curl  \
+    vim \
+    nano
+
+# Linkamos el public a /var/www/html
+ENV APP_HOME /var/www/html
+RUN mkdir -p /web/deploy/public && \
+    ln -s /web/deploy/public $APP_HOME 
+
+# Intalamos node y npm
+RUN curl --silent --location https://rpm.nodesource.com/setup_16.x | bash -
+RUN yum clean all
+RUN yum install nodejs nodejs-devel nodejs-docs --enablerepo=nodesource  -y
+RUN npm update npm -g
+
+# Intalamos laravel
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
+    ln -s /usr/local/bin/composer /usr/bin/composer && \
+    composer global require "laravel/installer" && \
+    sed -i 's/short_open_tag = Off/short_open_tag = On/g' /etc/php.ini
+
+
+# Actualizamos default apache con lo creado
+ADD ami-httpd.conf /etc/httpd/conf/httpd.conf
+
+
+# Updateamos composer, linkamos storage a public, generamos key para laravel -(solo si no hay proyecto ya) y damos permisos a las carpetas cache de escritura (todo después de q se levante el contenedor, sino pitaría al no existir las carpetas)
+ONBUILD RUN cd /web/deploy/ && \
+            composer update && \
+            composer global require laravel/installer && \
+            php artisan key:generate && \
+            chmod -R 777 /web/deploy/storage /web/deploy/bootstrap && \
+            chown -R apache:apache /web/deploy/storage /web/deploy/bootstrap && \
+            php artisan storage:link
+
+# Exponiendo puertos apache
+EXPOSE 80
+
+# Reiniciamos apache2
+CMD ["/usr/sbin/init"]
+
+ADD run-httpd.sh /run-httpd.sh
+RUN chmod -v +x /run-httpd.sh
+
+CMD ["/run-httpd.sh"]
